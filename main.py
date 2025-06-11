@@ -1,10 +1,10 @@
 import streamlit as st
 import random
 
-# 🌈 페이지 설정
+# 페이지 설정
 st.set_page_config(page_title="💪 인체 근육 퀴즈", page_icon="🦴", layout="centered")
 
-# 🎨 기본 스타일
+# 스타일링
 st.markdown("""
     <style>
     .title {
@@ -25,6 +25,7 @@ st.markdown("""
         padding: 25px;
         box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
         margin-top: 30px;
+        font-size: 20px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -32,7 +33,7 @@ st.markdown("""
 st.markdown('<div class="title">💪 인체 근육 맞추기 퀴즈</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">몸의 주요 근육 30가지를 맞혀보세요! 단답형으로 입력하세요 🧠</div>', unsafe_allow_html=True)
 
-# 🧠 주요 근육 문제 데이터
+# 퀴즈 문제 데이터
 muscle_quiz = [
     {"korean": "가슴근", "english": "pectoralis major"},
     {"korean": "이두근", "english": "biceps brachii"},
@@ -58,40 +59,42 @@ muscle_quiz = [
     {"korean": "대원근", "english": "teres major"},
     {"korean": "소원근", "english": "teres minor"},
     {"korean": "능형근", "english": "rhomboid"},
-    {"korean": "상완삼두근", "english": "triceps brachii"},
-    {"korean": "상완이두근", "english": "biceps brachii"},
     {"korean": "쇄골하근", "english": "subclavius"},
     {"korean": "횡격막", "english": "diaphragm"},
     {"korean": "대흉근", "english": "pectoralis major"},
+    {"korean": "소흉근", "english": "pectoralis minor"},
+    {"korean": "전거근", "english": "serratus anterior"},
+    {"korean": "슬건근", "english": "semitendinosus"},
 ]
 
-# 세션 상태 관리
+# 세션 초기화
 if "score" not in st.session_state:
     st.session_state.score = 0
     st.session_state.q_index = 0
-    st.session_state.quiz = random.sample(muscle_quiz, 30)
+    st.session_state.quiz = random.sample(muscle_quiz, 30)  # 중복 없이 30개 선택
 
 # 현재 문제
-current = st.session_state.quiz[st.session_state.q_index]
-st.markdown(f"<div class='question-box'>🦴 <b>Q{st.session_state.q_index + 1}</b>: '{current['korean']}'의 영어 이름은?</div>", unsafe_allow_html=True)
-
-# ✍️ 사용자 입력
-answer = st.text_input("정답 입력 (예: biceps brachii)").strip().lower()
-
-if st.button("제출"):
-    if answer == current['english']:
-        st.success("🎉 정답입니다!")
-        st.session_state.score += 1
-    else:
-        st.error(f"❌ 오답입니다. 정답은 **{current['english']}** 입니다.")
+if st.session_state.q_index < len(st.session_state.quiz):
+    current = st.session_state.quiz[st.session_state.q_index]
     
-    st.session_state.q_index += 1
+    st.markdown(
+        f"<div class='question-box'>🦴 <b>Q{st.session_state.q_index + 1}</b>: '{current['korean']}'의 영어 이름은?</div>", 
+        unsafe_allow_html=True
+    )
 
-    if st.session_state.q_index >= len(st.session_state.quiz):
-        st.balloons()
-        st.markdown(f"## ✅ 퀴즈 종료! 총 점수: **{st.session_state.score} / 30**")
-        st.markdown("🔄 새로고침해서 다시 시작할 수 있어요.")
-        st.stop()
-    else:
+    answer = st.text_input("정답을 입력하세요 (예: biceps brachii)").strip().lower()
+
+    if st.button("제출"):
+        if answer == current["english"]:
+            st.success("✅ 정답입니다!")
+            st.session_state.score += 1
+        else:
+            st.error(f"❌ 오답입니다. 정답은 **{current['english']}** 입니다.")
+        
+        st.session_state.q_index += 1
         st.experimental_rerun()
+else:
+    st.balloons()
+    st.markdown(f"## 🎉 퀴즈 완료! 총 점수: **{st.session_state.score} / 30**")
+    st.markdown("🔁 페이지를 새로고침하면 퀴즈를 다시 시작할 수 있어요!")
 
