@@ -13,7 +13,7 @@ st.markdown("""
 
 st.markdown('<div class="title">💪 근육 초성 퀴즈</div>', unsafe_allow_html=True)
 
-# 🧩 초성 퀴즈 데이터
+# 초성 퀴즈 데이터
 chosung_data = [
     {"name": "삼각근", "chosung": "ㅅㄱㄱ", "hint": "어깨에 위치"},
     {"name": "이두근", "chosung": "ㅇㄷㄱ", "hint": "팔 앞쪽"},
