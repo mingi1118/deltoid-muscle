@@ -1,9 +1,8 @@
 import streamlit as st
 import random
-import os
 
 # 페이지 설정
-st.set_page_config(page_title="💪 근육 퀴즈", page_icon="🧠", layout="centered")
+st.set_page_config(page_title="💪 근육 초성 퀴즈", page_icon="🧠", layout="centered")
 
 st.markdown("""
     <style>
@@ -12,21 +11,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="title">💪 근육 이름 퀴즈</div>', unsafe_allow_html=True)
-
-# 📷 사진 퀴즈 데이터
-photo_data = [
-    {"filename": "deltoid.jpg", "answer": "삼각근"},
-    {"filename": "biceps.jpg", "answer": "이두근"},
-    {"filename": "triceps.jpg", "answer": "삼두근"},
-    {"filename": "pectoralis_major.jpg", "answer": "대흉근"},
-    {"filename": "latissimus_dorsi.jpg", "answer": "광배근"},
-    {"filename": "rectus_abdominis.jpg", "answer": "복직근"},
-    {"filename": "gluteus_maximus.jpg", "answer": "둔근"},
-    {"filename": "hamstrings.jpg", "answer": "햄스트링"},
-    {"filename": "quadriceps.jpg", "answer": "대퇴사두근"},
-    {"filename": "gastrocnemius.jpg", "answer": "종아리근"},
-]
+st.markdown('<div class="title">💪 근육 초성 퀴즈</div>', unsafe_allow_html=True)
 
 # 🧩 초성 퀴즈 데이터
 chosung_data = [
@@ -42,49 +27,35 @@ chosung_data = [
     {"name": "종아리근", "chosung": "ㅈㅇㄹㄱ", "hint": "종아리"},
 ]
 
-# 폴더 경로
-IMAGE_FOLDER = "muscle_images"
-
-# 퀴즈 유형 선택
-quiz_type = st.radio("퀴즈 유형을 선택하세요:", ["🧩 초성 퀴즈", "📷 사진 퀴즈"])
+# 사용자 입력 비교 함수
+def normalize(text):
+    return text.replace(" ", "").strip()
 
 # 세션 상태 초기화
-if "quiz_data" not in st.session_state or st.session_state.get("quiz_type") != quiz_type:
-    st.session_state.quiz_type = quiz_type
+if "quiz_data" not in st.session_state:
+    st.session_state.quiz_data = random.sample(chosung_data, len(chosung_data))
     st.session_state.q_index = 0
     st.session_state.score = 0
-
-    if quiz_type == "📷 사진 퀴즈":
-        # 실제 존재하는 파일만 필터링
-        valid_photos = [q for q in photo_data if os.path.exists(os.path.join(IMAGE_FOLDER, q["filename"]))]
-        st.session_state.quiz_data = random.sample(valid_photos, len(valid_photos))
-    else:
-        st.session_state.quiz_data = random.sample(chosung_data, len(chosung_data))
 
 # 퀴즈 진행
 if st.session_state.q_index < len(st.session_state.quiz_data):
     q = st.session_state.quiz_data[st.session_state.q_index]
     st.markdown(f"### 문제 {st.session_state.q_index + 1} / {len(st.session_state.quiz_data)}")
+    st.markdown(f"**초성:** `{q['chosung']}`")
+    st.markdown(f"<div class='hint'>💡 힌트: {q['hint']}</div>", unsafe_allow_html=True)
 
-    if quiz_type == "📷 사진 퀴즈":
-        img_path = os.path.join(IMAGE_FOLDER, q["filename"])
-        st.image(img_path, caption="이 근육의 이름은?", use_column_width=True)
-        answer = q["answer"]
-    else:
-        st.markdown(f"**초성:** `{q['chosung']}`")
-        st.markdown(f"<div class='hint'>💡 힌트: {q['hint']}</div>", unsafe_allow_html=True)
-        answer = q["name"]
+    with st.form("quiz_form", clear_on_submit=True):
+        user_input = st.text_input("정답을 입력하세요 (한글)", key="answer_input")
+        submitted = st.form_submit_button("제출")
 
-    user_input = st.text_input("정답을 입력하세요 (한글)").strip()
-
-    if st.button("제출"):
-        if user_input == answer:
-            st.success("✅ 정답입니다!")
-            st.session_state.score += 1
-        else:
-            st.error(f"❌ 오답입니다. 정답은 **{answer}** 입니다.")
-        st.session_state.q_index += 1
-        st.experimental_rerun()
+        if submitted:
+            if normalize(user_input) == normalize(q["name"]):
+                st.success("✅ 정답입니다!")
+                st.session_state.score += 1
+            else:
+                st.error(f"❌ 오답입니다. 정답은 **{q['name']}** 입니다.")
+            st.session_state.q_index += 1
+            st.experimental_rerun()
 
 else:
     st.balloons()
@@ -92,3 +63,4 @@ else:
     if st.button("🔁 다시 시작하기"):
         del st.session_state.quiz_data
         st.experimental_rerun()
+
