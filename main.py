@@ -27,17 +27,14 @@ chosung_data = [
     {"name": "종아리근", "chosung": "ㅈㅇㄹㄱ", "hint": "종아리"},
 ]
 
-# 사용자 입력 비교 함수
 def normalize(text):
     return text.replace(" ", "").strip()
 
-# 세션 상태 초기화
 if "quiz_data" not in st.session_state:
     st.session_state.quiz_data = random.sample(chosung_data, len(chosung_data))
     st.session_state.q_index = 0
     st.session_state.score = 0
 
-# 퀴즈 진행
 if st.session_state.q_index < len(st.session_state.quiz_data):
     q = st.session_state.quiz_data[st.session_state.q_index]
     st.markdown(f"### 문제 {st.session_state.q_index + 1} / {len(st.session_state.quiz_data)}")
@@ -55,12 +52,13 @@ if st.session_state.q_index < len(st.session_state.quiz_data):
             else:
                 st.error(f"❌ 오답입니다. 정답은 **{q['name']}** 입니다.")
             st.session_state.q_index += 1
-            st.experimental_rerun()
+            st.rerun()  # 여기만 변경됨
 
 else:
     st.balloons()
     st.markdown(f"## 🎉 퀴즈 완료! 점수: **{st.session_state.score} / {len(st.session_state.quiz_data)}**")
     if st.button("🔁 다시 시작하기"):
         del st.session_state.quiz_data
-        st.experimental_rerun()
+        st.rerun()
+
 
